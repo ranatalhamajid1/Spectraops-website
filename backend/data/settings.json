@@ -1,0 +1,21 @@
+{
+    "branding": {
+        "siteName": "SpectraOps Ltd",
+        "tagline": "Secure. Scale. Succeed."
+    },
+    "apis": {
+        "hibpEnabled": false,
+        "virustotalEnabled": false,
+        "abuseipdbEnabled": false
+    },
+    "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "secure": false,
+        "user": "spectraopsofficial@gmail.com"
+    },
+    "payments": {
+        "stripePublicKey": "",
+        "paypalClientId": ""
+    }
+}

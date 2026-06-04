@@ -1,0 +1,63 @@
+# 🔐 **SpectraOps Admin Dashboard Login Credentials**
+
+**Current Date/Time**: 2025-06-11 08:12:05 UTC  
+**Current User**: ranatalhamajid1  
+**Location**: Islamabad, Pakistan
+
+## 🔑 **Admin Login Credentials**
+
+Based on the current server configuration, here are the valid admin login credentials for accessing the SpectraOps Admin Dashboard:
+
+### **Primary Admin Account:**
+- **Username**: `ranatalhamajid1`
+- **Password**: `SpectraOps2025!`
+- **Role**: Admin
+- **Access Level**: Full Admin Privileges
+
+### **Secondary Admin Accounts:**
+- **Username**: `admin`
+- **Password**: `Admin123!`
+- **Role**: Admin
+
+- **Username**: `talha`
+- **Password**: `Talha2025!`
+- **Role**: Admin
+
+## 🌐 **Admin Access URLs:**
+
+1. **Admin Login Page**: `http://localhost:3000/admin-login`
+2. **Direct Dashboard**: `http://localhost:3000/admin-dashboard.html` (after login)
+3. **Admin Route**: `http://localhost:3000/admin` (redirects to login)
+
+## 🎯 **Login Process:**
+
+1. Visit `http://localhost:3000/admin-login`
+2. Enter username: `ranatalhamajid1`
+3. Enter password: `SpectraOps2025!`
+4. Click "Login to Dashboard"
+5. You'll be redirected to the admin dashboard
+
+## 🛡️ **Security Features:**
+
+- ✅ **Session Management**: Authentication stored in browser session
+- ✅ **Password Protection**: No auto-login bypass
+- ✅ **Controlled Access**: Proper authentication flow
+- ✅ **Auto-Logout**: Session management with logout functionality
+
+## 📊 **Admin Dashboard Features:**
+
+Once logged in, you'll have access to:
+- 📈 Real-time contact form submissions
+- 📧 Email subscription management
+- 🛡️ Security tools usage monitoring
+- 📋 Recent activity logs
+- 👥 User analytics and statistics
+- ⚙️ System health monitoring
+
+## 🔄 **Dashboard Auto-Refresh:**
+
+The admin dashboard now refreshes data every **60 seconds** (not nanoseconds) to provide real-time updates without causing performance issues.
+
+---
+
+**Note**: These credentials are configured in the current server setup. In a production environment, these should be stored securely with proper password hashing and environment variables.
