@@ -7,6 +7,7 @@ const rateLimit = require('express-rate-limit');
 
 // Database initialization
 const db = require('./config/database');
+const { authenticateToken } = require('./auth/middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -145,7 +146,7 @@ app.get('/api/admin/check', async (req, res) => {
 });
 
 // Admin dashboard overview
-app.get('/api/admin/dashboard', async (req, res) => {
+app.get('/api/admin/dashboard', authenticateToken, async (req, res) => {
     try {
         const totalContacts = await db.get('SELECT COUNT(*) as count FROM contact_submissions');
         const recent = await db.get("SELECT COUNT(*) as count FROM contact_submissions WHERE created_at >= datetime('now', '-7 days')");
@@ -166,7 +167,7 @@ app.get('/api/admin/dashboard', async (req, res) => {
 });
 
 // Admin contact submissions messages list
-app.get('/api/admin/messages', async (req, res) => {
+app.get('/api/admin/messages', authenticateToken, async (req, res) => {
     try {
         const contacts = await db.all('SELECT * FROM contact_submissions ORDER BY id DESC');
         return res.json({ success: true, contacts: contacts, subscribers: [] });
