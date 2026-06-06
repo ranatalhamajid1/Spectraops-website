@@ -44,6 +44,18 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check endpoint (defined before rate limiter to prevent 429 errors from platform health checks)
+app.get('/api/health', (req, res) => {
+    res.json({
+        success: true,
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        server: 'SpectraOps Modular Server',
+        version: '4.0.0',
+        uptime: process.uptime()
+    });
+});
+
 // Rate limiting: 100 requests per 15 minutes max
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -168,17 +180,7 @@ app.post('/api/check-breach', toolsController.checkEmailBreach);
 app.post('/api/check-password', toolsController.checkPassword);
 app.post('/api/scan-url', toolsController.scanUrl);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({
-        success: true,
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        server: 'SpectraOps Modular Server',
-        version: '4.0.0',
-        uptime: process.uptime()
-    });
-});
+// Health check endpoint has been moved before the rate limiter to prevent 429 Too Many Requests errors
 
 // Serve static assets from React production build first, fallback to source/legacy
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
