@@ -29,13 +29,12 @@ class EmailService {
             }
         };
 
-        this.transporter = nodemailer.createTransporter(smtpConfig);
-        
         try {
+            this.transporter = nodemailer.createTransport(smtpConfig);
             await this.transporter.verify();
             console.log('✅ Email service initialized successfully');
         } catch (error) {
-            console.error('❌ Email service initialization failed:', error);
+            console.error('❌ Email service initialization failed:', error.message);
         }
     }
 
