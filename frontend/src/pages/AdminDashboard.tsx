@@ -337,7 +337,7 @@ export const AdminDashboard: React.FC = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="admin, support, hr, finance, content"
-                    className="w-full pl-10 pr-4 py-3 glass-input text-xs"
+                    className="w-full !pl-10 !pr-4 py-3 glass-input text-xs"
                   />
                 </div>
               </div>
@@ -352,7 +352,7 @@ export const AdminDashboard: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-4 py-3 glass-input text-xs"
+                    className="w-full !pl-10 !pr-4 py-3 glass-input text-xs"
                   />
                 </div>
               </div>
