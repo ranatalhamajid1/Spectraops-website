@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, CheckCircle2, ArrowRight, AlertCircle, ShoppingCart } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 const ecommerceServices = [
   {
@@ -33,9 +34,15 @@ export const EcommerceCompliance: React.FC = () => {
   const [details, setDetails] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken && (import.meta as any).env?.VITE_TURNSTILE_ENABLED !== 'false') {
+      setStatus('error');
+      setMessage('Please complete the security verification (Turnstile) challenge.');
+      return;
+    }
     setStatus('loading');
     setMessage('');
 
@@ -47,6 +54,7 @@ export const EcommerceCompliance: React.FC = () => {
         service_type: `ecom_${marketplaceType}`,
         message: details,
         source: 'ecommerce_compliance_page',
+        turnstileToken,
       });
 
       if (res.success) {
@@ -56,6 +64,7 @@ export const EcommerceCompliance: React.FC = () => {
         setEmail('');
         setCompany('');
         setDetails('');
+        setTurnstileToken(null);
       } else {
         throw new Error(res.error || 'Submission failed');
       }
@@ -152,6 +161,8 @@ export const EcommerceCompliance: React.FC = () => {
                 <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-600 dark:text-slate-400">Store Metrics / Operations Overview</label>
                 <textarea rows={4} required value={details} onChange={(e) => setDetails(e.target.value)} placeholder="Please detail approximate monthly volume, locations of sales (nexus states), or gateway verification issues..." className="w-full glass-input resize-none" />
               </div>
+
+              <TurnstileWidget onVerify={setTurnstileToken} />
 
               <button type="submit" disabled={status === 'loading'} className="w-full py-4 bg-gradient-to-r from-cyber-accent to-cyber-glow text-white font-bold rounded-xl text-xs hover:brightness-110 shadow-glow disabled:opacity-50 transition-all flex items-center justify-center space-x-2">
                 <span>Submit Merchant Audit request</span>

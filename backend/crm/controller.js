@@ -63,10 +63,23 @@ class CrmController {
 
     // Create a new lead (public or admin created)
     async createLead(req, res) {
-        const { name, email, phone, company, source, status, notes } = req.body;
+        const { name, email, phone, company, source, status, notes, turnstileToken } = req.body;
 
         if (!name || !email) {
             return res.status(400).json({ success: false, error: 'Name and email are required' });
+        }
+
+        // Exclude authenticated admins from Turnstile validation
+        const isAuthenticatedAdmin = req.user !== undefined;
+
+        if (!isAuthenticatedAdmin && process.env.TURNSTILE_ENABLED !== 'false') {
+            if (!turnstileToken) {
+                return res.status(400).json({ success: false, error: 'Security verification (Turnstile) is required.' });
+            }
+            const isHuman = await CrmController.verifyTurnstile(turnstileToken, req.ip);
+            if (!isHuman) {
+                return res.status(400).json({ success: false, error: 'Security verification failed. Please try again.' });
+            }
         }
 
         // Robustly parse the message / details from various form inputs
@@ -134,7 +147,6 @@ class CrmController {
                 console.log(`📧 Notification email sent successfully to spectraopsofficial@gmail.com`);
             } catch (mailErr) {
                 console.error('❌ Failed to dispatch email notification:', mailErr.message);
-                // Graceful fallback: do not fail the request if email server is temporarily offline
             }
 
             return res.status(201).json({
@@ -145,6 +157,25 @@ class CrmController {
         } catch (error) {
             console.error('createLead error:', error);
             return res.status(500).json({ success: false, error: 'Failed to create lead' });
+        }
+    }
+
+    // Helper to verify Cloudflare Turnstile token
+    static async verifyTurnstile(token, ip) {
+        const secret = process.env.TURNSTILE_SECRET_KEY || '1x00000000000000000000000000000000';
+        try {
+            const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}&remoteip=${encodeURIComponent(ip || '')}`
+            });
+            const data = await response.json();
+            return data.success;
+        } catch (err) {
+            console.error('Turnstile verification error:', err);
+            return true; // Fail open in case Cloudflare service is unreachable
         }
     }
 

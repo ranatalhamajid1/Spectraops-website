@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileCheck, ShieldCheck, CheckCircle2, ArrowRight, AlertCircle } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 const taxServices = [
   {
@@ -43,9 +44,15 @@ export const TaxCompliance: React.FC = () => {
   const [messageText, setMessageText] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken && (import.meta as any).env?.VITE_TURNSTILE_ENABLED !== 'false') {
+      setStatus('error');
+      setMessage('Please complete the security verification (Turnstile) challenge.');
+      return;
+    }
     setStatus('loading');
     setMessage('');
 
@@ -57,6 +64,7 @@ export const TaxCompliance: React.FC = () => {
         service_type: `tax_${serviceType}`,
         message: messageText,
         source: 'tax_compliance_page',
+        turnstileToken,
       });
 
       if (res.success) {
@@ -66,6 +74,7 @@ export const TaxCompliance: React.FC = () => {
         setEmail('');
         setCompany('');
         setMessageText('');
+        setTurnstileToken(null);
       } else {
         throw new Error(res.error || 'Submission failed');
       }
@@ -160,6 +169,8 @@ export const TaxCompliance: React.FC = () => {
                 <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-600 dark:text-slate-400">Corporate Details / Filing History</label>
                 <textarea rows={4} required value={messageText} onChange={(e) => setMessageText(e.target.value)} placeholder="Include registration state, date of formation, and specific filings due..." className="w-full glass-input resize-none" />
               </div>
+
+              <TurnstileWidget onVerify={setTurnstileToken} />
 
               <button type="submit" disabled={status === 'loading'} className="w-full py-4 bg-gradient-to-r from-cyber-accent to-cyber-glow text-white font-bold rounded-xl text-xs hover:brightness-110 shadow-glow disabled:opacity-50 transition-all flex items-center justify-center space-x-2">
                 <span>Request Compliance Action</span>

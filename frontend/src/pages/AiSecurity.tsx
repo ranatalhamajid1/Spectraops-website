@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Cpu, Shield, AlertTriangle, CheckCircle2, ArrowRight, AlertCircle, ShieldAlert, FileText, Code } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 const aiServices = [
   {
@@ -47,9 +48,15 @@ export const AiSecurity: React.FC = () => {
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken && (import.meta as any).env?.VITE_TURNSTILE_ENABLED !== 'false') {
+      setStatus('error');
+      setMessage('Please complete the security verification (Turnstile) challenge.');
+      return;
+    }
     setStatus('loading');
     setMessage('');
 
@@ -60,6 +67,7 @@ export const AiSecurity: React.FC = () => {
         service_type: 'ai_security',
         message: `Model Architecture: ${modelType}. Overview: ${description}`,
         source: 'ai_security_page',
+        turnstileToken,
       });
 
       if (res.success) {
@@ -68,6 +76,7 @@ export const AiSecurity: React.FC = () => {
         setName('');
         setEmail('');
         setDescription('');
+        setTurnstileToken(null);
       } else {
         throw new Error(res.error || 'Submission failed');
       }
@@ -165,6 +174,8 @@ export const AiSecurity: React.FC = () => {
                   <label className="text-[10px] uppercase tracking-wider font-extrabold text-slate-600 dark:text-slate-400">Model Pipelines & Tool Capabilities Overview</label>
                   <textarea rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Specify if LLM runs tools, accesses internal databases, connects to the web, or receives user-uploaded files..." className="w-full glass-input resize-none" />
                 </div>
+
+                <TurnstileWidget onVerify={setTurnstileToken} />
 
                 <button type="submit" disabled={status === 'loading'} className="w-full py-4 bg-gradient-to-r from-purple-500 to-cyber-accent text-white font-bold rounded-xl text-xs hover:brightness-110 shadow-glow disabled:opacity-50 transition-all flex items-center justify-center space-x-2">
                   <span>Submit Audit Request</span>

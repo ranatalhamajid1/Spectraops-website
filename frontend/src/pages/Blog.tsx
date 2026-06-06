@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Search, ArrowRight, ShieldCheck, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 interface Post {
   id: number;
@@ -21,6 +22,7 @@ export const Blog: React.FC = () => {
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [subscribeMsg, setSubscribeMsg] = useState('');
   const [loading, setLoading] = useState(true);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -95,6 +97,11 @@ export const Blog: React.FC = () => {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken && (import.meta as any).env?.VITE_TURNSTILE_ENABLED !== 'false') {
+      setSubscribeStatus('error');
+      setSubscribeMsg('Please complete the security verification (Turnstile) challenge.');
+      return;
+    }
     setSubscribeStatus('loading');
     setSubscribeMsg('');
 
@@ -104,12 +111,14 @@ export const Blog: React.FC = () => {
         email,
         subject: 'Newsletter Subscription',
         message: 'User subscribed to threat intelligence newsletter feed.',
-        source: 'newsletter_signup'
+        source: 'newsletter_signup',
+        turnstileToken,
       });
       if (res.success) {
         setSubscribeStatus('success');
         setSubscribeMsg('Thank you for subscribing to our threat intelligence and regulatory feeds.');
         setEmail('');
+        setTurnstileToken(null);
       } else {
         throw new Error(res.error || 'Failed to subscribe.');
       }
@@ -254,6 +263,8 @@ export const Blog: React.FC = () => {
                     {subscribeStatus === 'loading' ? 'Joining...' : 'Subscribe'}
                   </button>
                 </div>
+                
+                <TurnstileWidget onVerify={setTurnstileToken} />
 
                 {subscribeStatus === 'success' && (
                   <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-xs flex items-center space-x-2">

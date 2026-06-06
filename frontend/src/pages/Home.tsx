@@ -7,6 +7,7 @@ import {
   Send, Cpu, Globe, Award, DollarSign, Activity
 } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
+import { TurnstileWidget } from '../components/TurnstileWidget';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -335,6 +336,7 @@ export const Home: React.FC = () => {
   const [message, setMessage] = useState('');
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [formMsg, setFormMsg] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleQuickBreachCheck = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -360,17 +362,24 @@ export const Home: React.FC = () => {
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken && (import.meta as any).env?.VITE_TURNSTILE_ENABLED !== 'false') {
+      setFormStatus('error');
+      setFormMsg('Please complete the security verification (Turnstile) challenge.');
+      return;
+    }
     setFormStatus('loading');
     setFormMsg('');
     try {
       const res = await makeApiRequest('/crm/leads', 'POST', {
         name, email, subject: subject || 'General Inquiry',
         message: message || 'Inquiry from homepage.', source: 'spectraops_home_lead',
+        turnstileToken,
       });
       if (res.success) {
         setFormStatus('success');
         setFormMsg(`Inquiry sent! Reference: SO-${Math.floor(Math.random() * 9000 + 1000)}`);
         setName(''); setEmail(''); setSubject(''); setMessage('');
+        setTurnstileToken(null); // Reset Turnstile state
       } else { throw new Error(res.error || 'Failed'); }
     } catch (err: any) {
       setFormStatus('error');
@@ -798,6 +807,8 @@ export const Home: React.FC = () => {
                   <label className="text-xs font-bold uppercase tracking-[0.1em]" style={{ color: 'var(--text-muted)' }}>Message / Requirements *</label>
                   <textarea required rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Provide specifications..." className="glass-input resize-none" />
                 </div>
+
+                <TurnstileWidget onVerify={setTurnstileToken} />
 
                 <button type="submit" disabled={formStatus === 'loading'} className="btn-lime w-full text-center flex justify-center items-center gap-2">
                   <Send className="h-4 w-4" />

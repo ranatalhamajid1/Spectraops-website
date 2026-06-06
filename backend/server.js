@@ -24,10 +24,49 @@ const PORT = process.env.PORT || 3000;
 
 // ===== GLOBAL SECURITY MIDDLEWARES =====
 app.use(helmet({
-    contentSecurityPolicy: false, // Disabled for testing/demo CDN imports
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://challenges.cloudflare.com", "https://db.onlinewebfonts.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com"],
+            imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://challenges.cloudflare.com", "https://spectraops.pk", "https://www.spectraops.pk"],
+            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://api.fontshare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com", "data:"],
+            frameSrc: ["'self'", "https://challenges.cloudflare.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
     crossOriginEmbedderPolicy: false
 }));
-app.use(cors());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['https://spectraops.pk', 'https://www.spectraops.pk', 'http://localhost:5173', 'http://localhost:3000'];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
+
+// Administrative login brute force rate limiter
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { success: false, error: 'Too many login attempts. Please try again after 15 minutes.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/verify-mfa', loginLimiter);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

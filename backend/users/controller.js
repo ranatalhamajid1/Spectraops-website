@@ -1,6 +1,16 @@
 const bcrypt = require('bcrypt');
 const db = require('../config/database');
 
+function isPasswordComplex(password) {
+    const minLength = 12;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasDigit = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+    
+    return password.length >= minLength && hasUppercase && hasLowercase && hasDigit && hasSpecial;
+}
+
 class UsersController {
     // List all users (Admins only)
     async getUsers(req, res) {
@@ -41,6 +51,13 @@ class UsersController {
 
         if (!username || !email || !password || !fullName || !role) {
             return res.status(400).json({ success: false, error: 'Missing required fields' });
+        }
+
+        if (!isPasswordComplex(password)) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Password must be at least 12 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.' 
+            });
         }
 
         try {
@@ -107,6 +124,12 @@ class UsersController {
                 params.push(fullName);
             }
             if (password) {
+                if (!isPasswordComplex(password)) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        error: 'Password must be at least 12 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.' 
+                    });
+                }
                 const passwordHash = await bcrypt.hash(password, 12);
                 updates.push('password_hash = ?');
                 params.push(passwordHash);
