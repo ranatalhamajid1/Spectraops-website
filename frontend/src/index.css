@@ -423,3 +423,46 @@ h1,h2,h3,h4,h5,h6{font-family:var(--font);font-weight:900;text-transform:upperca
   color: var(--text-muted) !important;
 }
 
+/* Custom additions for light mode contrast and readability */
+.light .text-cyber-accent {
+  color: var(--text-primary) !important;
+}
+.light .text-cyber-glow {
+  color: var(--text-primary) !important;
+}
+.light .border-cyber-accent {
+  border-color: var(--text-primary) !important;
+}
+.light .border-cyber-glow {
+  border-color: var(--text-primary) !important;
+}
+.light .bg-cyber-accent\/10,
+.light .bg-cyber-accent\/15 {
+  background-color: rgba(5, 5, 5, 0.08) !important;
+}
+
+/* Numbered services readability in light mode */
+.light .numbered-item {
+  color: var(--text-primary) !important;
+}
+.light .numbered-item-title {
+  color: var(--text-primary) !important;
+}
+.light .numbered-item-desc {
+  color: var(--text-secondary) !important;
+}
+
+/* Marquee readability in light mode */
+.light .marquee-text {
+  color: var(--text-primary) !important;
+}
+.light .marquee-text .accent {
+  color: var(--brand-primary) !important;
+}
+
+/* Ensure unselected dashboard tab texts are readable in light mode */
+.light .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+

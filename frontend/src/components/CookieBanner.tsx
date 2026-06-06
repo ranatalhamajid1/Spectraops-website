@@ -67,7 +67,7 @@ export const CookieBanner: React.FC = () => {
               className="py-2.5 px-4 rounded-xl text-[10px] uppercase tracking-wider font-extrabold cursor-pointer transition-all duration-200"
               style={{
                 backgroundColor: 'var(--brand-primary)',
-                color: '#050505',
+                color: 'var(--black)',
               }}
             >
               Accept All
@@ -88,7 +88,7 @@ export const CookieBanner: React.FC = () => {
               className="py-2.5 px-4 rounded-xl text-[10px] uppercase tracking-wider font-extrabold cursor-pointer transition-all duration-200 border"
               style={{
                 borderColor: 'var(--color-border)',
-                color: 'var(--text-muted)',
+                color: 'var(--text-secondary)',
                 backgroundColor: 'transparent',
               }}
             >
@@ -184,7 +184,7 @@ export const CookieBanner: React.FC = () => {
               className="py-2.5 px-4 flex-grow rounded-xl text-[10px] uppercase tracking-wider font-extrabold cursor-pointer transition-all duration-200"
               style={{
                 backgroundColor: 'var(--brand-primary)',
-                color: '#050505',
+                color: 'var(--black)',
               }}
             >
               Save Preferences
