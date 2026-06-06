@@ -28,10 +28,10 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://challenges.cloudflare.com", "https://db.onlinewebfonts.com"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com", "https://cdn.fontshare.com"],
             imgSrc: ["'self'", "data:", "https://images.unsplash.com", "https://challenges.cloudflare.com", "https://spectraops.pk", "https://www.spectraops.pk"],
-            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://api.fontshare.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com", "data:"],
+            connectSrc: ["'self'", "https://challenges.cloudflare.com", "https://api.fontshare.com", "https://cdn.fontshare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "https://db.onlinewebfonts.com", "https://api.fontshare.com", "https://cdn.fontshare.com", "data:"],
             frameSrc: ["'self'", "https://challenges.cloudflare.com"],
             objectSrc: ["'none'"],
             upgradeInsecureRequests: [],
@@ -42,16 +42,29 @@ app.use(helmet({
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['https://spectraops.pk', 'https://www.spectraops.pk', 'http://localhost:5173', 'http://localhost:3000'];
+    : [
+        'https://spectraops.pk',
+        'https://www.spectraops.pk',
+        'https://spectraops-website.onrender.com',
+        'http://localhost:5173',
+        'http://localhost:3000'
+      ];
 
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        
+        // Dynamically allow subdomains of spectraops.pk and onrender.com (e.g. Render deployments)
+        const isAllowed = allowedOrigins.indexOf(origin) !== -1 ||
+                          /^https?:\/\/([a-zA-Z0-9-]+\.)*spectraops\.pk$/.test(origin) ||
+                          /^https?:\/\/([a-zA-Z0-9-]+\.)*onrender\.com$/.test(origin);
+                          
+        if (isAllowed) {
+            return callback(null, true);
+        } else {
+            // Fail gracefully by returning false (omits CORS headers) instead of throwing an Error (which results in 500 server crash)
+            return callback(null, false);
         }
-        return callback(null, true);
     },
     credentials: true
 }));
