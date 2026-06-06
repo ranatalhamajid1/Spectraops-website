@@ -45,7 +45,7 @@ export const TurnstileWidget: React.FC<TurnstileWidgetProps> = ({
           }
         }
 
-        const siteKey = (import.meta as any).env?.VITE_TURNSTILE_SITEKEY || '1x00000000000000000000AA';
+        const siteKey = (import.meta as any).env?.VITE_TURNSTILE_SITEKEY || '0x4AAAAAAADfvFiAFXfuF1gcZ';
 
         try {
           const id = window.turnstile.render(containerRef.current, {
