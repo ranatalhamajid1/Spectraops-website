@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const emailService = require('../services/emailService');
 
 class CrmController {
     // ===== LEADS MANAGEMENT =====
@@ -68,7 +69,12 @@ class CrmController {
             return res.status(400).json({ success: false, error: 'Name and email are required' });
         }
 
+        // Robustly parse the message / details from various form inputs
+        const finalMessage = notes || req.body.message || req.body.details || 'New CRM Lead registration';
+        const finalSubject = req.body.subject || req.body.service_type || source || 'General Inquiry';
+
         try {
+            // 1. Insert into crm_leads
             const result = await db.run(
                 `INSERT INTO crm_leads (name, email, phone, company, source, status, notes)
                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -79,9 +85,57 @@ class CrmController {
                     company || null,
                     source || 'manual',
                     status || 'new',
-                    notes || null
+                    finalMessage
                 ]
             );
+
+            // 2. Also log in contact_submissions so it shows up in the inquiries dashboard section
+            await db.run(
+                `INSERT INTO contact_submissions (name, email, phone, company, subject, message, service_type, source, ip_address)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    name,
+                    email,
+                    phone || null,
+                    company || null,
+                    finalSubject,
+                    finalMessage,
+                    req.body.service_type || null,
+                    source || 'website',
+                    req.ip || '127.0.0.1'
+                ]
+            );
+
+            // 3. Send email notification to the administrator
+            try {
+                await emailService.sendEmail(
+                    'spectraopsofficial@gmail.com',
+                    `[SpectraOps CRM Lead] New Inquiry: ${finalSubject}`,
+                    'default',
+                    {
+                        subject: `New Inquiry from ${name}`,
+                        content: `
+                            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                                <h3 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 8px;">New Contact Inquiry Received</h3>
+                                <p><strong>Name:</strong> ${name}</p>
+                                <p><strong>Email:</strong> ${email}</p>
+                                <p><strong>Company:</strong> ${company || 'N/A'}</p>
+                                <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
+                                <p><strong>Source:</strong> ${source || 'N/A'}</p>
+                                <p><strong>Subject:</strong> ${finalSubject}</p>
+                                <p><strong>Message / Specifications:</strong></p>
+                                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1; font-style: italic;">
+                                    ${finalMessage.replace(/\n/g, '<br />')}
+                                </div>
+                            </div>
+                        `
+                    }
+                );
+                console.log(`📧 Notification email sent successfully to spectraopsofficial@gmail.com`);
+            } catch (mailErr) {
+                console.error('❌ Failed to dispatch email notification:', mailErr.message);
+                // Graceful fallback: do not fail the request if email server is temporarily offline
+            }
 
             return res.status(201).json({
                 success: true,

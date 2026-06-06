@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, Database, CheckCircle, AlertTriangle, LogOut, ArrowRight, User, Settings, CreditCard, Landmark, Activity, FileText, Users } from 'lucide-react';
+import { Shield, Lock, Database, CheckCircle, AlertTriangle, LogOut, ArrowRight, User, Settings, CreditCard, Landmark, Activity, FileText, Users, MessageSquare } from 'lucide-react';
 import { makeApiRequest } from '../services/api';
 
 interface Lead {
@@ -38,6 +38,18 @@ interface JobApplication {
   created_at: string;
 }
 
+interface Inquiry {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  subject: string;
+  message: string;
+  service_type?: string;
+  created_at: string;
+}
+
 export const AdminDashboard: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [requireMfa, setRequireMfa] = useState(false);
@@ -54,10 +66,11 @@ export const AdminDashboard: React.FC = () => {
   const [mfaError, setMfaError] = useState('');
 
   // Dashboard views
-  const [activeTab, setActiveTab] = useState<'overview' | 'crm' | 'orders' | 'applications' | 'analytics' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'crm' | 'inquiries' | 'orders' | 'applications' | 'analytics' | 'settings'>('overview');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [dashboardLoading, setDashboardLoading] = useState(false);
 
   // CRM client note modal/form inputs
@@ -148,6 +161,7 @@ export const AdminDashboard: React.FC = () => {
     setLeads([]);
     setOrders([]);
     setApplications([]);
+    setInquiries([]);
   };
 
   const fetchSettingsData = async () => {
@@ -186,6 +200,12 @@ export const AdminDashboard: React.FC = () => {
       const appsRes = await makeApiRequest('/careers/admin/applications', 'GET');
       if (appsRes.success) {
         setApplications(appsRes.data || []);
+      }
+
+      // Fetch Inquiries / Queries
+      const inquiriesRes = await makeApiRequest('/admin/messages', 'GET');
+      if (inquiriesRes.success) {
+        setInquiries(inquiriesRes.contacts || []);
       }
 
       // Fetch Settings if super_admin
@@ -430,6 +450,7 @@ export const AdminDashboard: React.FC = () => {
             {[
               { id: 'overview', label: 'Dashboard Overview', icon: Activity, roles: ['super_admin', 'admin', 'support', 'hr', 'finance', 'content_manager'] },
               { id: 'crm', label: 'CRM Leads Pipeline', icon: Users, roles: ['super_admin', 'admin', 'support', 'sales'] },
+              { id: 'inquiries', label: 'Inquiries / Queries', icon: MessageSquare, roles: ['super_admin', 'admin', 'support', 'sales'] },
               { id: 'orders', label: 'Service Orders', icon: CreditCard, roles: ['super_admin', 'admin', 'support', 'finance'] },
               { id: 'applications', label: 'Job Applications', icon: FileText, roles: ['super_admin', 'admin', 'hr'] },
               { id: 'analytics', label: 'Real-Time Analytics', icon: Landmark, roles: ['super_admin', 'admin'] },
@@ -694,6 +715,51 @@ export const AdminDashboard: React.FC = () => {
                       {orders.length === 0 && (
                         <tr>
                           <td colSpan={7} className="p-8 text-center text-slate-500">No active corporate orders currently logged.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {!dashboardLoading && activeTab === 'inquiries' && (
+              <div className="glass-panel rounded-2xl border border-white/5 overflow-hidden">
+                <div className="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                  <h3 className="text-sm font-heading font-extrabold text-white">Inquiries & Queries</h3>
+                  <span className="text-[10px] bg-cyber-accent/15 text-cyber-accent px-2 py-0.5 rounded border border-cyber-accent/20 font-mono">
+                    {inquiries.length} Messages
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-white/5 text-[9px] uppercase font-bold text-slate-500 tracking-wider">
+                        <th className="p-4">Sender</th>
+                        <th className="p-4">Subject</th>
+                        <th className="p-4">Message</th>
+                        <th className="p-4">Received At</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {inquiries.map((inq) => (
+                        <tr key={inq.id} className="hover:bg-white/5 transition-colors">
+                          <td className="p-4">
+                            <div className="font-extrabold text-white">{inq.name}</div>
+                            <div className="text-slate-500 text-[10px]">{inq.email}</div>
+                            {inq.phone && <div className="text-[10px] text-slate-400">{inq.phone}</div>}
+                            {inq.company && <div className="text-[10px] text-slate-400">{inq.company}</div>}
+                          </td>
+                          <td className="p-4 font-bold text-cyber-accent uppercase text-[10px]">{inq.subject}</td>
+                          <td className="p-4 max-w-md">
+                            <p className="text-slate-300 whitespace-pre-wrap">{inq.message}</p>
+                          </td>
+                          <td className="p-4 text-[10px] text-slate-500">{inq.created_at}</td>
+                        </tr>
+                      ))}
+                      {inquiries.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-slate-500">No inquiry submissions found.</td>
                         </tr>
                       )}
                     </tbody>

@@ -134,10 +134,21 @@ export const Navbar: React.FC<NavbarProps> = ({ theme, setTheme }) => {
                       Contact
                     </h3>
                     <div className="space-y-2">
-                      <a href="mailto:spectraopsofficial@gmail.com" className="block text-sm transition-colors"
+                      <a href="mailto:spectraopsofficial@gmail.com" className="block text-sm transition-colors hover:text-white"
                          style={{ color: 'var(--text-muted)' }}>
                         spectraopsofficial@gmail.com
                       </a>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                        <strong>Address:</strong> Multan / Islamabad, Pakistan
+                      </p>
+                      <div className="flex gap-4 pt-3">
+                        <a href="https://www.linkedin.com/company/spectraops-official/" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:text-white" style={{ color: 'var(--text-muted)' }}>
+                          LinkedIn
+                        </a>
+                        <a href="https://www.instagram.com/officialspectraops" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:text-white" style={{ color: 'var(--text-muted)' }}>
+                          Instagram
+                        </a>
+                      </div>
                     </div>
                   </div>
 

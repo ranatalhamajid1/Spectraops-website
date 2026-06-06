@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { CookieBanner } from './components/CookieBanner';
 
 // Pages
 import { Home } from './pages/Home';
@@ -44,6 +45,7 @@ const MainLayout: React.FC<LayoutProps> = ({ theme, setTheme, children }) => {
         {children}
       </main>
       {!isNoNavbar && <Footer />}
+      <CookieBanner />
     </div>
   );
 };

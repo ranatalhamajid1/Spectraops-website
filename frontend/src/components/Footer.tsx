@@ -79,6 +79,17 @@ export const Footer: React.FC = () => {
             <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', lineHeight: 1.7, maxWidth: '280px' }}>
               Enterprise cybersecurity, business formation, compliance, and development under one ecosystem.
             </p>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', lineHeight: 1.7, maxWidth: '280px', marginTop: '0.75rem' }}>
+              <strong>Address:</strong> Multan / Islamabad, Pakistan
+            </p>
+            <div className="flex gap-4 mt-4">
+              <a href="https://www.linkedin.com/company/spectraops-official/" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:opacity-100" style={{ color: 'var(--text-muted)', opacity: 0.8 }}>
+                LinkedIn
+              </a>
+              <a href="https://www.instagram.com/officialspectraops" target="_blank" rel="noopener noreferrer" className="text-xs transition-colors hover:opacity-100" style={{ color: 'var(--text-muted)', opacity: 0.8 }}>
+                Instagram
+              </a>
+            </div>
           </div>
 
           {/* Column 2 — Divisions */}
